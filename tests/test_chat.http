@@ -1,0 +1,12 @@
+### Test /chat POST
+POST http://localhost:8000/chat
+Content-Type: application/json
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello, how are you?"
+    }
+  ]
+}
