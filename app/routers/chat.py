@@ -25,6 +25,4 @@ class ChatResponse(BaseModel):
 async def chat_with_agent(request: ChatRequest):
     state = {"messages": [m.model_dump() for m in request.messages]}
     result = graph.invoke(state)
-    return {
-        "messages": [convert_message(m) for m in result["messages"]]
-    }
+    return {"messages": [convert_message(m) for m in result["messages"]]}
