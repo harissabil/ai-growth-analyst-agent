@@ -39,7 +39,7 @@ def get_graph():
     ]
     llm_with_tools = llm.bind_tools(tools)
 
-    def chatbot(state: ChatState) -> ChatState:
+    async def chatbot(state: ChatState) -> ChatState:
         response = llm_with_tools.invoke(state["messages"])
         return {"messages": [response]}
 

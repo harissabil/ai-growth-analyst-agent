@@ -6,8 +6,9 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from app.clients.google_analytics_client import APIError, GoogleAnalyticsClient
+from app.clients.google_analytics_client import GoogleAnalyticsClient
 from app.config import get_settings
+from app.errors.error import APIError
 
 
 def format_response(data):
