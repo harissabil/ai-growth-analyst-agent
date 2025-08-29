@@ -30,7 +30,7 @@ extend-exclude = ["venv", ".venv", "build", "dist"]
 select = ["E", "F", "I"]
 
 [tool.ruff.lint.per-file-ignores]
-"app/agent/tools.py" = ["E501"]
+"app/agent/tools/**" = ["E501"]
 
 [tool.ruff.format]
 quote-style = "double"
