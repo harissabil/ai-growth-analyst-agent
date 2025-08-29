@@ -34,5 +34,5 @@ async def chat_with_agent(
     token = credentials.credentials
     state = {"messages": [m.model_dump() for m in request.messages]}
     config = {"configurable": {"auth_token": token}}
-    result = graph.invoke(state, config=config)
+    result = await graph.ainvoke(state, config=config)
     return {"messages": [convert_message(m) for m in result["messages"]]}
