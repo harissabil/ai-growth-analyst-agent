@@ -12,9 +12,7 @@ logger = logging.getLogger(__name__)
 
 class BaseAnalyticsData(BaseModel):
     sessions: int
-    screen_page_views: int = Field(
-        ..., alias="screenPageViews"
-    )  # Handle potential camelCase from API
+    screen_page_views: int = Field(..., alias="screenPageViews")  # Handle potential camelCase from API
     bounce_rate: float = Field(..., alias="bounceRate")
     average_session_duration: float = Field(..., alias="averageSessionDuration")
     active_users: int = Field(..., alias="activeUsers")
@@ -66,11 +64,7 @@ class GoogleAnalyticsClient:
         self, start_date: date, end_date: date, organic_only: bool = False
     ) -> BaseAnalyticsData:
         """Fetches overall analytics data."""
-        endpoint = (
-            "/google/analytics/overall-organic-traffic"
-            if organic_only
-            else "/google/analytics/overall"
-        )
+        endpoint = "/google/analytics/overall-organic-traffic" if organic_only else "/google/analytics/overall"
         params = {"start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
         response_data = await self._make_request("GET", endpoint, params=params)
         return BaseAnalyticsData.model_validate(response_data["data"])
@@ -79,9 +73,7 @@ class GoogleAnalyticsClient:
         self, start_date: date, end_date: date, organic_only: bool = False
     ) -> List[DailyAnalyticsData]:
         """Fetches daily analytics data."""
-        endpoint = (
-            "/google/analytics/daily-organic-traffic" if organic_only else "/google/analytics/daily"
-        )
+        endpoint = "/google/analytics/daily-organic-traffic" if organic_only else "/google/analytics/daily"
         params = {"start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
         response_data = await self._make_request("GET", endpoint, params=params)
         return [DailyAnalyticsData.model_validate(item) for item in response_data["data"]]
