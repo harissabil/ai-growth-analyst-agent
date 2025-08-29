@@ -6,10 +6,15 @@ from .google_analytics import (
     get_google_analytics_traffic_by_countries,
     get_google_analytics_traffic_by_pages,
 )
+from .utils import get_current_datetime
 
 # --- When you add more tools, just import them and add them to this list ---
 # from .search_console import get_search_console_clicks
 # from .admob import get_admob_revenue
+
+utility_tools = [
+    get_current_datetime,
+]
 
 google_analytics_tools = [
     get_google_analytics_overall_traffic,
@@ -23,4 +28,4 @@ google_analytics_tools = [
 # search_console_tools = [get_search_console_clicks, ...]
 
 # Combine all tools into one list for the agent
-all_tools = google_analytics_tools  # + search_console_tools + admob_tools
+all_tools = utility_tools + google_analytics_tools  # + search_console_tools + admob_tools
