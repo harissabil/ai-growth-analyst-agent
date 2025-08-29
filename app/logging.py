@@ -203,9 +203,7 @@ class AuditJSONHandler(BaseCallbackHandler):
             "llm.start",
             extra={
                 "event": "llm.start",
-                "model": (serialized or {}).get("id")
-                if isinstance(serialized, dict)
-                else str(serialized),
+                "model": (serialized or {}).get("id") if isinstance(serialized, dict) else str(serialized),
                 "prompts": [_trunc(p) for p in prompts],
                 "run_id": str(kw.get("run_id") or ""),
                 "parent_run_id": str(kw.get("parent_run_id") or ""),
@@ -228,11 +226,7 @@ class AuditJSONHandler(BaseCallbackHandler):
     # --- Tools (include input/output) ---
     def on_tool_start(self, serialized, input_str, **kw):
         self._start(kw.get("run_id"))
-        name = (
-            kw.get("name")
-            or (serialized.get("name") if isinstance(serialized, dict) else None)
-            or "<unknown>"
-        )
+        name = kw.get("name") or (serialized.get("name") if isinstance(serialized, dict) else None) or "<unknown>"
         # input_str can be dict or string; log compact JSON
         self.log.info(
             "tool.start",
