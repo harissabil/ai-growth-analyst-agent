@@ -5,14 +5,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
-from app.agent.tools import (
-    get_daily_traffic,
-    get_daily_traffic_for_country,
-    get_daily_traffic_for_page,
-    get_overall_traffic,
-    get_traffic_by_countries,
-    get_traffic_by_pages,
-)
+from app.agent.tools import all_tools
 from app.config import get_settings
 
 
@@ -29,17 +22,13 @@ def get_graph():
         api_version=settings.azure_openai_api_version,
     )
 
-    tools = [
-        get_overall_traffic,
-        get_daily_traffic,
-        get_traffic_by_countries,
-        get_daily_traffic_for_country,
-        get_traffic_by_pages,
-        get_daily_traffic_for_page,
-    ]
+    tools = all_tools
+    for t in tools:
+        if not getattr(t, "name", None):
+            t.name = t.__name__
     llm_with_tools = llm.bind_tools(tools)
 
-    async def chatbot(state: ChatState) -> ChatState:
+    def chatbot(state: ChatState) -> ChatState:
         response = llm_with_tools.invoke(state["messages"])
         return {"messages": [response]}
 
