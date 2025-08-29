@@ -5,7 +5,7 @@ from typing import Any, List, Literal, Optional
 import httpx
 from pydantic import BaseModel, Field
 
-from app.clients.errors.errors import APIError
+from app.errors.error import APIError
 
 logger = logging.getLogger(__name__)
 
