@@ -8,9 +8,7 @@ from app.agent.agent import get_graph
 from app.logging import AuditJSONHandler
 from app.utils.chat_utils import to_public_messages
 
-bearer_scheme = HTTPBearer(
-    scheme_name="Bearer", description="Enter your Bearer token", bearerFormat="JWT"
-)
+bearer_scheme = HTTPBearer(scheme_name="Bearer", description="Enter your Bearer token", bearerFormat="JWT")
 
 router = APIRouter()
 graph = get_graph()
