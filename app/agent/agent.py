@@ -22,6 +22,17 @@ def get_graph():
         api_version=settings.azure_openai_api_version,
     )
 
+    system_prompt = """You are an AI Growth Analyst that can call tools for Google Analytics (GA4), 
+    Search Console, and AdMob.
+
+    Rules:
+    - If the user uses a relative time ("today", "yesterday", "last week/month/quarter"), FIRST call get_current_datetime, then compute exact YYYY-MM-DD start/end before calling any data tool.
+    - Do not guess missing required parameters; ask a brief follow-up (one sentence, max) to get what’s missing.
+    - Prefer concise answers with small tables or bullet summaries and one-sentence insights.
+    - If a tool returns an error, explain it simply and suggest the minimal next step (e.g., narrower date range, missing auth).
+    - Never expose raw tokens or internal config.
+    """
+
     tools = all_tools
     for t in tools:
         if not getattr(t, "name", None):
@@ -29,7 +40,7 @@ def get_graph():
     llm_with_tools = llm.bind_tools(tools)
 
     def chatbot(state: ChatState) -> ChatState:
-        response = llm_with_tools.invoke(state["messages"])
+        response = llm_with_tools.invoke([{"role": "system", "content": system_prompt}, *state["messages"]])
         return {"messages": [response]}
 
     tool_node = ToolNode(tools)
