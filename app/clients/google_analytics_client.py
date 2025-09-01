@@ -64,7 +64,7 @@ class GoogleAnalyticsClient:
         self, start_date: date, end_date: date, organic_only: bool = False
     ) -> BaseAnalyticsData:
         """Fetches overall analytics data."""
-        endpoint = "/google/analytics/overall-organic-traffic" if organic_only else "/google/analytics/overall"
+        endpoint = "/google-analytics/overall-organic-traffic" if organic_only else "/google-analytics/overall"
         params = {"start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
         response_data = await self._make_request("GET", endpoint, params=params)
         return BaseAnalyticsData.model_validate(response_data["data"])
@@ -73,7 +73,7 @@ class GoogleAnalyticsClient:
         self, start_date: date, end_date: date, organic_only: bool = False
     ) -> List[DailyAnalyticsData]:
         """Fetches daily analytics data."""
-        endpoint = "/google/analytics/daily-organic-traffic" if organic_only else "/google/analytics/daily"
+        endpoint = "/google-analytics/daily-organic-traffic" if organic_only else "/google-analytics/daily"
         params = {"start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
         response_data = await self._make_request("GET", endpoint, params=params)
         return [DailyAnalyticsData.model_validate(item) for item in response_data["data"]]
@@ -87,7 +87,7 @@ class GoogleAnalyticsClient:
         search: Optional[str] = None,
     ) -> List[CountryAnalyticsData]:
         """Fetches analytics data grouped by country."""
-        endpoint = "/google/analytics/countries"
+        endpoint = "/google-analytics/countries"
         params = {
             "start_date": start_date.isoformat(),
             "end_date": end_date.isoformat(),
@@ -103,7 +103,7 @@ class GoogleAnalyticsClient:
         self, country: str, start_date: date, end_date: date
     ) -> List[DailyAnalyticsData]:
         """Fetches daily analytics for a specific country."""
-        endpoint = f"/google/analytics/countries/{country.lower()}"
+        endpoint = f"/google-analytics/countries/{country.lower()}"
         params = {"start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
         response_data = await self._make_request("GET", endpoint, params=params)
         return [DailyAnalyticsData.model_validate(item) for item in response_data["data"]]
@@ -117,7 +117,7 @@ class GoogleAnalyticsClient:
         search: Optional[str] = None,
     ) -> List[PageAnalyticsData]:
         """Fetches analytics data grouped by page."""
-        endpoint = "/google/analytics/pages"
+        endpoint = "/google-analytics/pages"
         params = {
             "start_date": start_date.isoformat(),
             "end_date": end_date.isoformat(),
@@ -135,7 +135,7 @@ class GoogleAnalyticsClient:
         """Fetches daily analytics for a specific page."""
         # The page path needs to be URL encoded if it contains special characters,
         # but httpx handles this automatically for path parameters.
-        endpoint = f"/google/analytics/pages/{page_path}"
+        endpoint = f"/google-analytics/pages/{page_path}"
         params = {"start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
         response_data = await self._make_request("GET", endpoint, params=params)
         return [DailyAnalyticsData.model_validate(item) for item in response_data["data"]]

@@ -6,6 +6,8 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
+from app.clients.google_analytics_client import GoogleAnalyticsClient
+from app.config import get_settings
 from app.errors.error import APIError
 
 
@@ -58,18 +60,18 @@ async def get_google_analytics_overall_traffic(
     """
     try:
         # Return a placeholder response for now
-        return (
-            '{"sessions": 12345, "users": 6789, "page_views": 101112, "bounce_rate": 50.5, "avg_session_duration": 300}'
-        )
-        # settings = get_settings()
-        # token = config.get("configurable", {}).get("auth_token")
-        # if not token:
-        #     return "Error: Authentication token was not provided to the tool."
-        #
-        # client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
-        #
-        # data = await client.fetch_overall_data(start_date, end_date, organic_only)
-        # return format_response(data)
+        # return (
+        #     '{"sessions": 12345, "users": 6789, "page_views": 101112, "bounce_rate": 50.5, "avg_session_duration": 300}'
+        # )
+        settings = get_settings()
+        token = config.get("configurable", {}).get("auth_token")
+        if not token:
+            return "Error: Authentication token was not provided to the tool."
+
+        client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
+
+        data = await client.fetch_overall_data(start_date, end_date, organic_only)
+        return format_response(data)
     except APIError as e:
         return f"Error fetching overall traffic: {e.message}"
 
@@ -85,15 +87,15 @@ async def get_google_analytics_daily_traffic(
     """
     try:
         # Return a placeholder response for now
-        return '[{"date": "2023-10-01", "sessions": 1000, "users": 800, "page_views": 1500, "bounce_rate": 45.0, "avg_session_duration": 250}, {"date": "2023-10-02", "sessions": 1200, "users": 900, "page_views": 1600, "bounce_rate": 50.0, "avg_session_duration": 300}]'
-        # settings = get_settings()
-        # token = config.get("configurable", {}).get("auth_token")
-        # if not token:
-        #     return "Error: Authentication token was not provided to the tool."
-        # client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
-        #
-        # data = await client.fetch_daily_data(start_date, end_date, organic_only)
-        # return format_response(data)
+        # return '[{"date": "2023-10-01", "sessions": 1000, "users": 800, "page_views": 1500, "bounce_rate": 45.0, "avg_session_duration": 250}, {"date": "2023-10-02", "sessions": 1200, "users": 900, "page_views": 1600, "bounce_rate": 50.0, "avg_session_duration": 300}]'
+        settings = get_settings()
+        token = config.get("configurable", {}).get("auth_token")
+        if not token:
+            return "Error: Authentication token was not provided to the tool."
+        client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
+
+        data = await client.fetch_daily_data(start_date, end_date, organic_only)
+        return format_response(data)
     except APIError as e:
         return f"Error fetching daily traffic: {e.message}"
 
@@ -113,15 +115,15 @@ async def get_google_analytics_traffic_by_countries(
     """
     try:
         # Return a placeholder response for now
-        return '[{"country": "United States", "sessions": 5000, "users": 4000, "page_views": 7000, "bounce_rate": 40.0, "avg_session_duration": 320}, {"country": "Spain", "sessions": 3000, "users": 2500, "page_views": 4500, "bounce_rate": 50.0, "avg_session_duration": 280}]'
-        # settings = get_settings()
-        # token = config.get("configurable", {}).get("auth_token")
-        # if not token:
-        #     return "Error: Authentication token was not provided to the tool."
-        # client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
-        #
-        # data = await client.fetch_countries_data(start_date, end_date, limit=limit, search=search)
-        # return format_response(data)
+        # return '[{"country": "United States", "sessions": 5000, "users": 4000, "page_views": 7000, "bounce_rate": 40.0, "avg_session_duration": 320}, {"country": "Spain", "sessions": 3000, "users": 2500, "page_views": 4500, "bounce_rate": 50.0, "avg_session_duration": 280}]'
+        settings = get_settings()
+        token = config.get("configurable", {}).get("auth_token")
+        if not token:
+            return "Error: Authentication token was not provided to the tool."
+        client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
+
+        data = await client.fetch_countries_data(start_date, end_date, limit=limit, search=search)
+        return format_response(data)
     except APIError as e:
         return f"Error fetching traffic by country: {e.message}"
 
@@ -137,15 +139,15 @@ async def get_google_analytics_daily_traffic_for_country(
     """
     try:
         # Return a placeholder response for now
-        return '[{"date": "2023-10-01", "sessions": 800, "users": 600, "page_views": 900, "bounce_rate": 42.0, "avg_session_duration": 290}, {"date": "2023-10-02", "sessions": 900, "users": 700, "page_views": 1000, "bounce_rate": 48.0, "avg_session_duration": 310}]'
-        # settings = get_settings()
-        # token = config.get("configurable", {}).get("auth_token")
-        # if not token:
-        #     return "Error: Authentication token was not provided to the tool."
-        # client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
-        #
-        # data = await client.fetch_country_detail_data(country, start_date, end_date)
-        # return format_response(data)
+        # return '[{"date": "2023-10-01", "sessions": 800, "users": 600, "page_views": 900, "bounce_rate": 42.0, "avg_session_duration": 290}, {"date": "2023-10-02", "sessions": 900, "users": 700, "page_views": 1000, "bounce_rate": 48.0, "avg_session_duration": 310}]'
+        settings = get_settings()
+        token = config.get("configurable", {}).get("auth_token")
+        if not token:
+            return "Error: Authentication token was not provided to the tool."
+        client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
+
+        data = await client.fetch_country_detail_data(country, start_date, end_date)
+        return format_response(data)
     except APIError as e:
         return f"Error fetching traffic for {country}: {e.message}"
 
@@ -165,15 +167,15 @@ async def get_google_analytics_traffic_by_pages(
     """
     try:
         # Return a placeholder response for now
-        return '[{"page_path": "/home", "sessions": 4000, "users": 3500, "page_views": 6000, "bounce_rate": 38.0, "avg_session_duration": 330}, {"page_path": "/products", "sessions": 2500, "users": 2000, "page_views": 3000, "bounce_rate": 45.0, "avg_session_duration": 290}]'
-        # settings = get_settings()
-        # token = config.get("configurable", {}).get("auth_token")
-        # if not token:
-        #     return "Error: Authentication token was not provided to the tool."
-        # client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
-        #
-        # data = await client.fetch_pages_data(start_date, end_date, limit=limit, search=search)
-        # return format_response(data)
+        # return '[{"page_path": "/home", "sessions": 4000, "users": 3500, "page_views": 6000, "bounce_rate": 38.0, "avg_session_duration": 330}, {"page_path": "/products", "sessions": 2500, "users": 2000, "page_views": 3000, "bounce_rate": 45.0, "avg_session_duration": 290}]'
+        settings = get_settings()
+        token = config.get("configurable", {}).get("auth_token")
+        if not token:
+            return "Error: Authentication token was not provided to the tool."
+        client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
+
+        data = await client.fetch_pages_data(start_date, end_date, limit=limit, search=search)
+        return format_response(data)
     except APIError as e:
         return f"Error fetching traffic by page: {e.message}"
 
@@ -189,14 +191,14 @@ async def get_google_analytics_daily_traffic_for_page(
     """
     try:
         # Return a placeholder response for now
-        return '[{"date": "2023-10-01", "sessions": 600, "users": 500, "page_views": 700, "bounce_rate": 44.0, "avg_session_duration": 270}, {"date": "2023-10-02", "sessions": 700, "users": 600, "page_views": 800, "bounce_rate": 46.0, "avg_session_duration": 290}]'
-        # settings = get_settings()
-        # token = config.get("configurable", {}).get("auth_token")
-        # if not token:
-        #     return "Error: Authentication token was not provided to the tool."
-        # client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
-        #
-        # data = await client.fetch_page_detail_data(page_path, start_date, end_date)
-        # return format_response(data)
+        # return '[{"date": "2023-10-01", "sessions": 600, "users": 500, "page_views": 700, "bounce_rate": 44.0, "avg_session_duration": 270}, {"date": "2023-10-02", "sessions": 700, "users": 600, "page_views": 800, "bounce_rate": 46.0, "avg_session_duration": 290}]'
+        settings = get_settings()
+        token = config.get("configurable", {}).get("auth_token")
+        if not token:
+            return "Error: Authentication token was not provided to the tool."
+        client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
+
+        data = await client.fetch_page_detail_data(page_path, start_date, end_date)
+        return format_response(data)
     except APIError as e:
         return f"Error fetching traffic for page {page_path}: {e.message}"
