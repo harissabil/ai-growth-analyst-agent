@@ -1,52 +1,47 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# ---- log everything to LogFiles/startup.log ----
+# ---- log to /home/LogFiles/startup.log ----
 mkdir -p /home/LogFiles
 exec > >(tee -a /home/LogFiles/startup.log) 2>&1
+
+APP_ROOT="/home/site/wwwroot"
 
 echo "[startup] PWD=$(pwd)"
 echo "[startup] Listing /home/site/wwwroot:"
 ls -la /home/site/wwwroot || true
 
-APP_ROOT="/home/site/wwwroot"
-VENV="$APP_ROOT/.venv"
+# Use the interpreter Azure gives us (antenv)
+PY_BIN="$(which python3 || which python)"
+echo "[startup] Python: $($PY_BIN --version 2>&1)"
+echo "[startup] PY_BIN=$PY_BIN"
+echo "[startup] PORT=${PORT:-<unset>}  WEBSITES_PORT=${WEBSITES_PORT:-<unset>}"
 
-echo "[startup] Python: $(python3 --version || python --version || true)"
-echo "[startup] WHICH python: $(which python3 || which python || true)"
-echo "[startup] PORT env: ${PORT:-<unset>}"
-echo "[startup] WEBSITES_PORT: ${WEBSITES_PORT:-<unset>}"
+# Upgrade pip and install uv into the current env (antenv)
+$PY_BIN -m pip install --upgrade pip
+$PY_BIN -m pip install --no-cache-dir uv
 
-# ---- ensure venv ----
-if [ ! -d "$VENV" ]; then
-  echo "[startup] creating venv at $VENV"
-  python3 -m venv "$VENV" || python -m venv "$VENV"
-fi
-# shellcheck disable=SC1090
-source "$VENV/bin/activate"
-python -V
-pip --version
-
-# ---- install uv ----
-python -m pip install --upgrade pip
-pip install --no-cache-dir uv
-
-# ---- sync deps (prefer lock) ----
+# ---- Install project deps ----
+# Prefer uv.lock; fallback to requirements.txt; fallback to pyproject
 if [ -f "$APP_ROOT/uv.lock" ]; then
-  echo "[startup] uv sync --frozen --no-dev"
-  uv sync --frozen --no-dev
+  echo "[startup] uv pip install from uv.lock"
+  # Install resolved wheels recorded in lock using uv's pip subcommand
+  uv pip install -r <(uv export --locked)
+elif [ -f "$APP_ROOT/requirements.txt" ]; then
+  echo "[startup] uv pip install -r requirements.txt"
+  uv pip install -r "$APP_ROOT/requirements.txt"
 else
-  echo "[startup] uv sync --no-dev (no lock file)"
-  uv sync --no-dev
+  echo "[startup] uv pip install -e . (pyproject only)"
+  uv pip install -e "$APP_ROOT"
 fi
 
-# ---- preflight import: fail fast with traceback if settings/env are missing ----
+# ---- Preflight import to surface config/env errors clearly ----
 echo "[startup] preflight import app.main ..."
-python - <<'PY'
+$PY_BIN - <<'PY'
 import traceback, sys
 print(">>> importing app.main for preflight ...")
 try:
-    import app.main  # noqa
+    import app.main  # noqa: F401
     print(">>> import OK")
 except Exception as e:
     print(">>> import FAILED:", e)
@@ -54,7 +49,7 @@ except Exception as e:
     sys.exit(1)
 PY
 
-# ---- run gunicorn/uvicorn ----
+# ---- Launch gunicorn/uvicorn ----
 export PYTHONPATH="$APP_ROOT"
 BIND_PORT="${PORT:-${WEBSITES_PORT:-8000}}"
 echo "[startup] starting gunicorn on 0.0.0.0:${BIND_PORT}"
