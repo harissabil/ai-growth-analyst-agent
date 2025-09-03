@@ -41,9 +41,7 @@ class TrafficInput(BaseModel):
     )
     organic_only: bool = Field(
         False,
-        description=(
-            "Set True to restrict to organic traffic only (maps from phrases like 'organic only')."
-        ),
+        description=("Set True to restrict to organic traffic only (maps from phrases like 'organic only')."),
     )
 
 
@@ -56,15 +54,12 @@ class ByDimensionInput(BaseModel):
     )
     end_date: date = Field(
         ...,
-        description=(
-            "End date in YYYY-MM-DD. Resolve relative dates via get_current_datetime first."
-        ),
+        description=("End date in YYYY-MM-DD. Resolve relative dates via get_current_datetime first."),
     )
     limit: int = Field(
         10,
         description=(
-            "Max rows to return (maps from 'top N' or 'list N'). "
-            "Sane range: 1–50; defaults to 10 if unspecified."
+            "Max rows to return (maps from 'top N' or 'list N'). Sane range: 1–50; defaults to 10 if unspecified."
         ),
     )
     search: Optional[str] = Field(
@@ -81,9 +76,7 @@ class ByDimensionInput(BaseModel):
 class CountryDetailInput(BaseModel):
     country: str = Field(
         ...,
-        description=(
-            "The specific country to get data for (e.g., 'spain')."
-        ),
+        description=("The specific country to get data for (e.g., 'spain')."),
     )
     start_date: date = Field(
         ...,
@@ -98,9 +91,7 @@ class CountryDetailInput(BaseModel):
 class PageDetailInput(BaseModel):
     page_path: str = Field(
         ...,
-        description=(
-            "The page path without dns name to get data for (e.g., '/home' or '/renting-bmw-x8/details')."
-        ),
+        description=("The page path without dns name to get data for (e.g., '/home' or '/renting-bmw-x8/details')."),
     )
     start_date: date = Field(
         ...,
@@ -114,7 +105,7 @@ class PageDetailInput(BaseModel):
 
 @tool(args_schema=TrafficInput)
 async def get_google_analytics_overall_traffic(
-        start_date: date, end_date: date, organic_only: bool = False, config: RunnableConfig = {}
+    start_date: date, end_date: date, organic_only: bool = False, config: RunnableConfig = {}
 ) -> str:
     """
     Source: Google Analytics
@@ -143,7 +134,7 @@ async def get_google_analytics_overall_traffic(
 
 @tool(args_schema=TrafficInput)
 async def get_google_analytics_daily_traffic(
-        start_date: date, end_date: date, organic_only: bool = False, config: RunnableConfig = {}
+    start_date: date, end_date: date, organic_only: bool = False, config: RunnableConfig = {}
 ) -> str:
     """
     Source: Google Analytics
@@ -168,11 +159,11 @@ async def get_google_analytics_daily_traffic(
 
 @tool(args_schema=ByDimensionInput)
 async def get_google_analytics_traffic_by_countries(
-        start_date: date,
-        end_date: date,
-        limit: int = 10,
-        search: Optional[str] = None,
-        config: RunnableConfig = {},
+    start_date: date,
+    end_date: date,
+    limit: int = 10,
+    search: Optional[str] = None,
+    config: RunnableConfig = {},
 ) -> str:
     """
     Source: Google Analytics
@@ -198,7 +189,7 @@ async def get_google_analytics_traffic_by_countries(
 
 @tool(args_schema=CountryDetailInput)
 async def get_google_analytics_daily_traffic_for_country(
-        country: str, start_date: date, end_date: date, config: RunnableConfig = {}
+    country: str, start_date: date, end_date: date, config: RunnableConfig = {}
 ) -> str:
     """
     Source: Google Analytics
@@ -222,11 +213,11 @@ async def get_google_analytics_daily_traffic_for_country(
 
 @tool(args_schema=ByDimensionInput)
 async def get_google_analytics_traffic_by_pages(
-        start_date: date,
-        end_date: date,
-        limit: int = 10,
-        search: Optional[str] = None,
-        config: RunnableConfig = {},
+    start_date: date,
+    end_date: date,
+    limit: int = 10,
+    search: Optional[str] = None,
+    config: RunnableConfig = {},
 ) -> str:
     """
     Source: Google Analytics
@@ -252,7 +243,7 @@ async def get_google_analytics_traffic_by_pages(
 
 @tool(args_schema=PageDetailInput)
 async def get_google_analytics_daily_traffic_for_page(
-        page_path: str, start_date: date, end_date: date, config: RunnableConfig = {}
+    page_path: str, start_date: date, end_date: date, config: RunnableConfig = {}
 ) -> str:
     """
     Source: Google Analytics
