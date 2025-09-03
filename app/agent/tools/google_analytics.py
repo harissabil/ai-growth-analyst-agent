@@ -25,38 +25,103 @@ def format_response(data):
 
 
 class TrafficInput(BaseModel):
-    start_date: date = Field(..., description="The start date for the report in YYYY-MM-DD format.")
-    end_date: date = Field(..., description="The end date for the report in YYYY-MM-DD format.")
-    organic_only: bool = Field(False, description="Set to True to get data for organic traffic only.")
+    start_date: date = Field(
+        ...,
+        description=(
+            "Start date in YYYY-MM-DD. Must be <= end_date. "
+            "If the user used a relative date, resolve to an absolute date via get_current_datetime first."
+        ),
+    )
+    end_date: date = Field(
+        ...,
+        description=(
+            "End date in YYYY-MM-DD. Must be >= start_date. "
+            "If the user used a relative date, resolve via get_current_datetime first."
+        ),
+    )
+    organic_only: bool = Field(
+        False,
+        description=(
+            "Set True to restrict to organic traffic only (maps from phrases like 'organic only')."
+        ),
+    )
 
 
 class ByDimensionInput(BaseModel):
-    start_date: date = Field(..., description="The start date for the report in YYYY-MM-DD format.")
-    end_date: date = Field(..., description="The end date for the report in YYYY-MM-DD format.")
-    limit: int = Field(10, description="The number of results to return.")
-    search: Optional[str] = Field(None, description="A search query to filter results.")
+    start_date: date = Field(
+        ...,
+        description=(
+            "Start date in YYYY-MM-DD. Resolve relative dates (today/yesterday/last week/month/quarter) via get_current_datetime first."
+        ),
+    )
+    end_date: date = Field(
+        ...,
+        description=(
+            "End date in YYYY-MM-DD. Resolve relative dates via get_current_datetime first."
+        ),
+    )
+    limit: int = Field(
+        10,
+        description=(
+            "Max rows to return (maps from 'top N' or 'list N'). "
+            "Sane range: 1–50; defaults to 10 if unspecified."
+        ),
+    )
+    search: Optional[str] = Field(
+        None,
+        description=(
+            "Keyword filter (case-insensitive 'contains'). "
+            "For pages: applies to page path/title as supported by backend. "
+            "For countries: applies to country name or keyword that includes in the name (e.g., 'United' matches 'United States', 'Spain'). "
+            "Maps from user keywords like 'BMW'."
+        ),
+    )
 
 
 class CountryDetailInput(BaseModel):
-    country: str = Field(..., description="The specific country to get data for (e.g., 'spain').")
-    start_date: date = Field(..., description="The start date for the report in YYYY-MM-DD format.")
-    end_date: date = Field(..., description="The end date for the report in YYYY-MM-DD format.")
+    country: str = Field(
+        ...,
+        description=(
+            "The specific country to get data for (e.g., 'spain')."
+        ),
+    )
+    start_date: date = Field(
+        ...,
+        description="Start date in YYYY-MM-DD (resolve relative dates first).",
+    )
+    end_date: date = Field(
+        ...,
+        description="End date in YYYY-MM-DD (resolve relative dates first).",
+    )
 
 
 class PageDetailInput(BaseModel):
-    page_path: str = Field(..., description="The full page path to get data for (e.g., 'vamos.es/todos-los-coches/').")
-    start_date: date = Field(..., description="The start date for the report in YYYY-MM-DD format.")
-    end_date: date = Field(..., description="The end date for the report in YYYY-MM-DD format.")
+    page_path: str = Field(
+        ...,
+        description=(
+            "The page path without dns name to get data for (e.g., '/home' or '/renting-bmw-x8/details')."
+        ),
+    )
+    start_date: date = Field(
+        ...,
+        description="Start date in YYYY-MM-DD (resolve relative dates first).",
+    )
+    end_date: date = Field(
+        ...,
+        description="End date in YYYY-MM-DD (resolve relative dates first).",
+    )
 
 
 @tool(args_schema=TrafficInput)
 async def get_google_analytics_overall_traffic(
-    start_date: date, end_date: date, organic_only: bool = False, config: RunnableConfig = {}
+        start_date: date, end_date: date, organic_only: bool = False, config: RunnableConfig = {}
 ) -> str:
     """
-    Fetches the total, aggregated Google Analytics data (sessions, users, etc.) for a given date range. Use for high-level summaries.
-
-    IMPORTANT: This tool requires specific start_date and end_date. If the user asks a question with a relative date like 'today', 'yesterday', or 'last week', you MUST first use the 'get_current_datetime' tool to determine the exact dates before calling this one.
+    Source: Google Analytics
+    Purpose: High-level totals/trends (sessions, users, etc.) for a date range.
+    When to use: The user asks for overall/aggregate metrics across a period.
+    Required: start_date, end_date (must be absolute; resolve relative dates via get_current_datetime first).
+    Options: organic_only=True if user requests 'organic only'.
     """
     try:
         # Return a placeholder response for now
@@ -78,12 +143,13 @@ async def get_google_analytics_overall_traffic(
 
 @tool(args_schema=TrafficInput)
 async def get_google_analytics_daily_traffic(
-    start_date: date, end_date: date, organic_only: bool = False, config: RunnableConfig = {}
+        start_date: date, end_date: date, organic_only: bool = False, config: RunnableConfig = {}
 ) -> str:
     """
-    Fetches a day-by-day breakdown of Google Analytics data for a given date range. Use for trends and daily performance.
-
-    IMPORTANT: This tool requires specific start_date and end_date. If the user asks a question with a relative date like 'today', 'yesterday', or 'last week', you MUST first use the 'get_current_datetime' tool to determine the exact dates before calling this one.
+    Source: Google Analytics
+    Purpose: Daily time series for a date range (trend analysis).
+    Required: start_date, end_date (absolute dates).
+    Options: organic_only=True if requested.
     """
     try:
         # Return a placeholder response for now
@@ -102,16 +168,18 @@ async def get_google_analytics_daily_traffic(
 
 @tool(args_schema=ByDimensionInput)
 async def get_google_analytics_traffic_by_countries(
-    start_date: date,
-    end_date: date,
-    limit: int = 10,
-    search: Optional[str] = None,
-    config: RunnableConfig = {},
+        start_date: date,
+        end_date: date,
+        limit: int = 10,
+        search: Optional[str] = None,
+        config: RunnableConfig = {},
 ) -> str:
     """
-    Fetches a list of countries ranked by traffic metrics for a given date range from Google Analytics.
-
-    IMPORTANT: This tool requires specific start_date and end_date. If the user asks a question with a relative date like 'today', 'yesterday', or 'last week', you MUST first use the 'get_current_datetime' tool to determine the exact dates before calling this one.
+    Source: Google Analytics
+    Purpose: Rank countries by traffic metrics for a date range.
+    Mapping: 'top N' → limit=N; 'the country with the es included in its name' → search='es'.
+    Required: start_date, end_date (absolute).
+    Optional: limit (default 10), search (case-insensitive 'contains').
     """
     try:
         # Return a placeholder response for now
@@ -130,12 +198,12 @@ async def get_google_analytics_traffic_by_countries(
 
 @tool(args_schema=CountryDetailInput)
 async def get_google_analytics_daily_traffic_for_country(
-    country: str, start_date: date, end_date: date, config: RunnableConfig = {}
+        country: str, start_date: date, end_date: date, config: RunnableConfig = {}
 ) -> str:
     """
-    Fetches a day-by-day traffic breakdown for a single, specific country from Google Analytics.
-
-    IMPORTANT: This tool requires specific start_date and end_date. If the user asks a question with a relative date like 'today', 'yesterday', or 'last week', you MUST first use the 'get_current_datetime' tool to determine the exact dates before calling this one.
+    Source: Google Analytics
+    Purpose: Daily breakdown for a single country over a date range.
+    Required: country, start_date, end_date (absolute).
     """
     try:
         # Return a placeholder response for now
@@ -154,16 +222,18 @@ async def get_google_analytics_daily_traffic_for_country(
 
 @tool(args_schema=ByDimensionInput)
 async def get_google_analytics_traffic_by_pages(
-    start_date: date,
-    end_date: date,
-    limit: int = 10,
-    search: Optional[str] = None,
-    config: RunnableConfig = {},
+        start_date: date,
+        end_date: date,
+        limit: int = 10,
+        search: Optional[str] = None,
+        config: RunnableConfig = {},
 ) -> str:
     """
-    Fetches a list of website pages ranked by traffic metrics for a given date range from Google Analytics.
-
-    IMPORTANT: This tool requires specific start_date and end_date. If the user asks a question with a relative date like 'today', 'yesterday', or 'last week', you MUST first use the 'get_current_datetime' tool to determine the exact dates before calling this one.
+    Source: Google Analytics
+    Purpose: Rank pages by traffic metrics for a date range.
+    Mapping: 'top N' → limit=N; user keywords (e.g., 'BMW') → search='BMW' (case-insensitive contains).
+    Required: start_date, end_date (absolute).
+    Optional: limit (default 10), search (optional, if not provided, return top N overall).
     """
     try:
         # Return a placeholder response for now
@@ -182,12 +252,12 @@ async def get_google_analytics_traffic_by_pages(
 
 @tool(args_schema=PageDetailInput)
 async def get_google_analytics_daily_traffic_for_page(
-    page_path: str, start_date: date, end_date: date, config: RunnableConfig = {}
+        page_path: str, start_date: date, end_date: date, config: RunnableConfig = {}
 ) -> str:
     """
-    Fetches a day-by-day traffic breakdown for a single, specific page path from Google Analytics.
-
-    IMPORTANT: This tool requires specific start_date and end_date. If the user asks a question with a relative date like 'today', 'yesterday', or 'last week', you MUST first use the 'get_current_datetime' tool to determine the exact dates before calling this one.
+    Source: Google Analytics
+    Purpose: Daily breakdown for a single page over a date range.
+    Required: page_path, start_date, end_date (absolute).
     """
     try:
         # Return a placeholder response for now
