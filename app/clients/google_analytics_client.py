@@ -10,11 +10,35 @@ from app.errors.error import APIError
 logger = logging.getLogger(__name__)
 
 
+def _extract_errors(payload: Any) -> List[str]:
+    """
+    Accepts:
+      {"errors": "google oauth required"}
+      {"errors": ["a", "b"]}
+      {"message": "Something"}                # your old shape
+      other
+    Returns a list[str]
+    """
+    try:
+        if isinstance(payload, dict):
+            if "errors" in payload:
+                val = payload["errors"]
+                if isinstance(val, list):
+                    return [str(x) for x in val if str(x).strip()]
+                if isinstance(val, str):
+                    return [val]
+            if "message" in payload and payload["message"]:
+                return [str(payload["message"])]
+    except Exception:
+        pass
+    return ["An unknown API error occurred."]
+
+
 class BaseAnalyticsData(BaseModel):
     sessions: int
     screen_page_views: int = Field(..., alias="screenPageViews")  # Handle potential camelCase from API
-    bounce_rate: float = Field(..., alias="bounceRate")
-    average_session_duration: float = Field(..., alias="averageSessionDuration")
+    bounce_rate_percent: float = Field(..., alias="bounceRatePercent")
+    average_session_duration_seconds: float = Field(..., alias="averageSessionDurationSeconds")
     active_users: int = Field(..., alias="activeUsers")
 
     class Config:
@@ -52,13 +76,18 @@ class GoogleAnalyticsClient:
             response.raise_for_status()  # Raises HTTPStatusError for 4xx/5xx responses
             return response.json()
         except httpx.HTTPStatusError as e:
-            error_data = e.response.json()
-            error_message = error_data.get("message", "An unknown API error occurred.")
-            logger.error(f"HTTP error occurred: {e.response.status_code} - {error_message}")
-            raise APIError(status_code=e.response.status_code, message=error_message)
+            # Try to parse error response
+            try:
+                error_data = e.response.json()
+            except Exception:
+                error_data = {"message": e.response.text}
+            errors = _extract_errors(error_data)
+            logger.error(f"HTTP error: {e.response.status_code} - {errors}")
+            raise APIError(status_code=e.response.status_code, errors=errors)
         except httpx.RequestError as e:
-            logger.error(f"Request error occurred: {e}")
-            raise APIError(status_code=500, message=f"Failed to connect to the service: {e}")
+            logger.error(f"Request error: {e}")
+            # 503 is a better fit for connectivity issues
+            raise APIError(status_code=503, errors=[f"Failed to connect to the service: {e}"])
 
     async def fetch_overall_data(
         self, start_date: date, end_date: date, organic_only: bool = False
