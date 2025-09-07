@@ -66,7 +66,7 @@ class ByDimensionInput(BaseModel):
         None,
         description=(
             "Keyword filter (case-insensitive 'contains'). "
-            "For pages: applies to page path/title as supported by backend. "
+            "For pages: applies to page path/title. "
             "For countries: applies to country name or keyword that includes in the name (e.g., 'United' matches 'United States', 'Spain'). "
             "Maps from user keywords like 'BMW'."
         ),
