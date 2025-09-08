@@ -13,6 +13,8 @@ dependencies = [
     "pydantic>=2.5.0",
     "langchain>=0.3.27",
     "pydantic-settings>=2.10.1",
+    "httpx>=0.28.1",
+    "gunicorn>=23.0.0",
 ]
 
 [dependency-groups]
@@ -22,11 +24,15 @@ dev = [
 
 [tool.ruff]
 target-version = "py313"
-line-length = 100
+line-length = 120
 extend-exclude = ["venv", ".venv", "build", "dist"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"app/agent/tools/**" = ["E501"]
+"app/agent/agent.py" = ["E501"]
 
 [tool.ruff.format]
 quote-style = "double"
