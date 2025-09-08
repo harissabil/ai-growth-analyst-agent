@@ -82,10 +82,10 @@ class GoogleAnalyticsClient:
             except Exception:
                 error_data = {"message": e.response.text}
             errors = _extract_errors(error_data)
-            logger.error(f"HTTP error: {e.response.status_code} - {errors}")
+            logger.error(f"[GA] HTTP error: {e.response.status_code} - {errors}")
             raise APIError(status_code=e.response.status_code, errors=errors)
         except httpx.RequestError as e:
-            logger.error(f"Request error: {e}")
+            logger.error(f"[GA] Request error: {e}")
             # 503 is a better fit for connectivity issues
             raise APIError(status_code=503, errors=[f"Failed to connect to the service: {e}"])
 
