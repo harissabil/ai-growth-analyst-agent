@@ -188,7 +188,7 @@ async def get_google_analytics_traffic_by_countries(
 
 
 @tool(args_schema=GaCountryDetailInput)
-async def  get_google_analytics_daily_traffic_for_country(
+async def get_google_analytics_daily_traffic_for_country(
     country: str, start_date: date, end_date: date, config: RunnableConfig = {}
 ) -> str:
     """

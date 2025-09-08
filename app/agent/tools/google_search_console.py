@@ -89,9 +89,7 @@ class GscKeywordDetailInput(BaseModel):
 
 # Tools
 @tool(args_schema=GscTrafficInput)
-async def get_search_console_overall(
-        start_date: date, end_date: date, config: RunnableConfig = {}
-) -> str:
+async def get_search_console_overall(start_date: date, end_date: date, config: RunnableConfig = {}) -> str:
     """
     Source: Google Search Console
     Purpose: High-level totals (clicks, impressions, ctr_percent, average_position) for a date range.
@@ -111,9 +109,7 @@ async def get_search_console_overall(
 
 
 @tool(args_schema=GscTrafficInput)
-async def get_search_console_daily(
-        start_date: date, end_date: date, config: RunnableConfig = {}
-) -> str:
+async def get_search_console_daily(start_date: date, end_date: date, config: RunnableConfig = {}) -> str:
     """
     Source: Google Search Console
     Purpose: Daily time series of clicks/impressions/ctr_percent/average_position.
@@ -134,11 +130,11 @@ async def get_search_console_daily(
 
 @tool(args_schema=GscByDimensionInput)
 async def get_search_console_keywords(
-        start_date: date,
-        end_date: date,
-        limit: int = 10,
-        search: Optional[str] = None,
-        config: RunnableConfig = {},
+    start_date: date,
+    end_date: date,
+    limit: int = 10,
+    search: Optional[str] = None,
+    config: RunnableConfig = {},
 ) -> str:
     """
     Source: Google Search Console
@@ -161,7 +157,7 @@ async def get_search_console_keywords(
 
 @tool(args_schema=GscKeywordDetailInput)
 async def get_search_console_daily_for_keyword(
-        keyword: str, start_date: date, end_date: date, config: RunnableConfig = {}
+    keyword: str, start_date: date, end_date: date, config: RunnableConfig = {}
 ) -> str:
     """
     Source: Google Search Console
@@ -183,11 +179,11 @@ async def get_search_console_daily_for_keyword(
 
 @tool(args_schema=GscByDimensionInput)
 async def get_search_console_countries(
-        start_date: date,
-        end_date: date,
-        limit: int = 10,
-        search: Optional[str] = None,
-        config: RunnableConfig = {},
+    start_date: date,
+    end_date: date,
+    limit: int = 10,
+    search: Optional[str] = None,
+    config: RunnableConfig = {},
 ) -> str:
     """
     Source: Google Search Console
@@ -210,7 +206,7 @@ async def get_search_console_countries(
 
 @tool(args_schema=GscCountryDetailInput)
 async def get_search_console_daily_for_country(
-        country: str, start_date: date, end_date: date, config: RunnableConfig = {}
+    country: str, start_date: date, end_date: date, config: RunnableConfig = {}
 ) -> str:
     """
     Source: Google Search Console
