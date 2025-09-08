@@ -24,7 +24,7 @@ def format_response(data):
         return f"Error formatting response: {e}"
 
 
-class TrafficInput(BaseModel):
+class GaTrafficInput(BaseModel):
     start_date: date = Field(
         ...,
         description=(
@@ -45,7 +45,7 @@ class TrafficInput(BaseModel):
     )
 
 
-class ByDimensionInput(BaseModel):
+class GaByDimensionInput(BaseModel):
     start_date: date = Field(
         ...,
         description=(
@@ -73,7 +73,7 @@ class ByDimensionInput(BaseModel):
     )
 
 
-class CountryDetailInput(BaseModel):
+class GaCountryDetailInput(BaseModel):
     country: str = Field(
         ...,
         description=("The specific country to get data for (e.g., 'spain')."),
@@ -88,7 +88,7 @@ class CountryDetailInput(BaseModel):
     )
 
 
-class PageDetailInput(BaseModel):
+class GaPageDetailInput(BaseModel):
     page_path: str = Field(
         ...,
         description=("The page path without dns name to get data for (e.g., '/home' or '/renting-bmw-x8/details')."),
@@ -103,7 +103,7 @@ class PageDetailInput(BaseModel):
     )
 
 
-@tool(args_schema=TrafficInput)
+@tool(args_schema=GaTrafficInput)
 async def get_google_analytics_overall_traffic(
     start_date: date, end_date: date, organic_only: bool = False, config: RunnableConfig = {}
 ) -> str:
@@ -129,10 +129,10 @@ async def get_google_analytics_overall_traffic(
         data = await client.fetch_overall_data(start_date, end_date, organic_only)
         return format_response(data)
     except APIError as e:
-        return f"Error fetching overall traffic: {e.message}"
+        return f"Error fetching overall traffic: {e.errors}"
 
 
-@tool(args_schema=TrafficInput)
+@tool(args_schema=GaTrafficInput)
 async def get_google_analytics_daily_traffic(
     start_date: date, end_date: date, organic_only: bool = False, config: RunnableConfig = {}
 ) -> str:
@@ -154,10 +154,10 @@ async def get_google_analytics_daily_traffic(
         data = await client.fetch_daily_data(start_date, end_date, organic_only)
         return format_response(data)
     except APIError as e:
-        return f"Error fetching daily traffic: {e.message}"
+        return f"Error fetching daily traffic: {e.errors}"
 
 
-@tool(args_schema=ByDimensionInput)
+@tool(args_schema=GaByDimensionInput)
 async def get_google_analytics_traffic_by_countries(
     start_date: date,
     end_date: date,
@@ -184,11 +184,11 @@ async def get_google_analytics_traffic_by_countries(
         data = await client.fetch_countries_data(start_date, end_date, limit=limit, search=search)
         return format_response(data)
     except APIError as e:
-        return f"Error fetching traffic by country: {e.message}"
+        return f"Error fetching traffic by country: {e.errors}"
 
 
-@tool(args_schema=CountryDetailInput)
-async def get_google_analytics_daily_traffic_for_country(
+@tool(args_schema=GaCountryDetailInput)
+async def  get_google_analytics_daily_traffic_for_country(
     country: str, start_date: date, end_date: date, config: RunnableConfig = {}
 ) -> str:
     """
@@ -208,10 +208,10 @@ async def get_google_analytics_daily_traffic_for_country(
         data = await client.fetch_country_detail_data(country, start_date, end_date)
         return format_response(data)
     except APIError as e:
-        return f"Error fetching traffic for {country}: {e.message}"
+        return f"Error fetching traffic for {country}: {e.errors}"
 
 
-@tool(args_schema=ByDimensionInput)
+@tool(args_schema=GaByDimensionInput)
 async def get_google_analytics_traffic_by_pages(
     start_date: date,
     end_date: date,
@@ -238,10 +238,10 @@ async def get_google_analytics_traffic_by_pages(
         data = await client.fetch_pages_data(start_date, end_date, limit=limit, search=search)
         return format_response(data)
     except APIError as e:
-        return f"Error fetching traffic by page: {e.message}"
+        return f"Error fetching traffic by page: {e.errors}"
 
 
-@tool(args_schema=PageDetailInput)
+@tool(args_schema=GaPageDetailInput)
 async def get_google_analytics_daily_traffic_for_page(
     page_path: str, start_date: date, end_date: date, config: RunnableConfig = {}
 ) -> str:
@@ -262,4 +262,4 @@ async def get_google_analytics_daily_traffic_for_page(
         data = await client.fetch_page_detail_data(page_path, start_date, end_date)
         return format_response(data)
     except APIError as e:
-        return f"Error fetching traffic for page {page_path}: {e.message}"
+        return f"Error fetching traffic for page {page_path}: {e.errors}"
