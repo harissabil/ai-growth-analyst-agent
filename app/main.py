@@ -1,7 +1,4 @@
 from dotenv import find_dotenv, load_dotenv
-
-load_dotenv(find_dotenv(), override=False)
-
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -15,6 +12,8 @@ from app.errors.handlers import (
 from app.routers.chat import router
 from app.storage.db import engine
 from app.storage.models import Base
+
+load_dotenv(find_dotenv(), override=False)
 
 app = FastAPI()
 
