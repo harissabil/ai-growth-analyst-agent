@@ -1,4 +1,5 @@
-from dotenv import load_dotenv, find_dotenv
+from dotenv import find_dotenv, load_dotenv
+
 load_dotenv(find_dotenv(), override=False)
 
 from fastapi import FastAPI
@@ -11,16 +12,17 @@ from app.errors.handlers import (
     http_exception_handler,
     validation_exception_handler,
 )
-
+from app.routers.chat import router
 from app.storage.db import engine
 from app.storage.models import Base
-from app.routers.chat import router
 
 app = FastAPI()
+
 
 @app.on_event("startup")
 def _init_db():
     Base.metadata.create_all(bind=engine)
+
 
 app.add_exception_handler(APIError, api_error_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)

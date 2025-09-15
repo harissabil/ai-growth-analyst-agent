@@ -56,25 +56,27 @@ async def chat_with_agent(
         await run_in_threadpool(lambda: save_messages_batch(history_id, [], {}))
         return {
             "chat_history_id": history_id,
-            "messages": [{"role": "assistant", "content": "I didn’t receive any messages from the agent.", "tables": None}],
+            "messages": [
+                {"role": "assistant", "content": "I didn’t receive any messages from the agent.", "tables": None}
+            ],
         }
 
     # 4) Build table mapping from tool outputs (keyed by index in full_messages)
     tables_by_assistant_idx = attach_tables_to_assistant_turns(full_messages)
 
     # 5) Determine the order of PUBLIC assistant messages by their indices in full_messages
-    from app.utils.chat_utils import to_public_messages, is_public  # local import avoids circulars in some setups
+    from app.utils.chat_utils import is_public  # local import avoids circulars in some setups
 
     assistant_public_full_idxs = [
-        i for i, m in enumerate(full_messages)
-        if is_public(m) and (
-            getattr(m, "type", None) in ("ai", "assistant")
-            or getattr(m, "role", None) == "assistant"
-        )
+        i
+        for i, m in enumerate(full_messages)
+        if is_public(m) and (getattr(m, "type", None) in ("ai", "assistant") or getattr(m, "role", None) == "assistant")
     ]
 
     # 6) For each public assistant, pick its tables by the full index
-    assistant_tables_iter: List[List[TableSpec]] = [tables_by_assistant_idx.get(i) or [] for i in assistant_public_full_idxs]
+    assistant_tables_iter: List[List[TableSpec]] = [
+        tables_by_assistant_idx.get(i) or [] for i in assistant_public_full_idxs
+    ]
 
     # 7) Convert to public messages and attach tables aligned with the public assistant order
     public = to_public_messages(full_messages)

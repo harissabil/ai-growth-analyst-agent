@@ -1,6 +1,7 @@
-from sqlalchemy import select, func, update
 from datetime import datetime
-from typing import Optional, List, Any, Dict
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy import func, select, update
 
 from app.storage.db import SessionLocal
 from app.storage.models import ChatHistory, ChatMessage
@@ -29,9 +30,9 @@ def ensure_history(chat_history_id: Optional[str], user_id: Optional[str], title
 
 
 def save_messages_batch(
-        chat_history_id: str,
-        messages: List[Any],
-        tables_by_assistant_idx: Dict[int, List[Any]],
+    chat_history_id: str,
+    messages: List[Any],
+    tables_by_assistant_idx: Dict[int, List[Any]],
 ):
     with SessionLocal() as s:
         # starting sequence
