@@ -16,6 +16,8 @@ dependencies = [
     "httpx>=0.28.1",
     "gunicorn>=23.0.0",
     "psycopg[binary]>=3.2",
+    "azure-cosmos>=4.9.0",
+    "azure-identity>=1.25.0",
 ]
 
 [dependency-groups]
