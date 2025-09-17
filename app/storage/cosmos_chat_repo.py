@@ -50,79 +50,155 @@ class ChatRepository:
         tables_by_assistant_idx: Dict[int, List[Any]],
         user_id: Optional[str] = None,
     ) -> None:
-        """Save a batch of messages to Cosmos DB."""
+        """Save only NEW messages to Cosmos DB by comparing with existing messages."""
         messages_container = self.client.get_messages_container()
         history_container = self.client.get_history_container()
 
-        # Get current max sequence number
-        query = """
-                SELECT VALUE MAX(c.sequence)
-                FROM c
-                WHERE c.chat_history_id = @chat_history_id \
-                """
+        # Get all existing messages to compare content
+        existing_messages_query = """
+                                  SELECT c.role, c.message, c.sequence
+                                  FROM c
+                                  WHERE c.chat_history_id = @chat_history_id
+                                  ORDER BY c.sequence ASC \
+                                  """
         params = [{"name": "@chat_history_id", "value": chat_history_id}]
 
-        result = list(
-            messages_container.query_items(query=query, parameters=params, enable_cross_partition_query=False)
-        )
-        current_max = result[0] if result and result[0] is not None else 0
-        seq = current_max + 1
+        try:
+            existing_result = list(
+                messages_container.query_items(
+                    query=existing_messages_query, parameters=params, enable_cross_partition_query=False
+                )
+            )
 
-        # Process and save only meaningful messages (skip tool messages and empty assistant messages)
-        message_docs = []
+            # Convert existing messages to comparable format
+            existing_messages = []
+            current_max_seq = 0
+            for msg in existing_result:
+                # Skip tool messages that shouldn't be compared
+                if msg.get("role") != "tool":
+                    existing_messages.append({"role": msg.get("role"), "content": msg.get("message", "").strip()})
+                current_max_seq = max(current_max_seq, msg.get("sequence", 0))
+
+        except Exception:
+            # Fallback to safe defaults if query fails
+            existing_messages = []
+            current_max_seq = 0
+
+        # Convert incoming messages to comparable format (skip tool messages)
+        incoming_messages = []
+        incoming_to_original_idx = {}  # Map filtered index to original index
 
         for i, m in enumerate(messages):
-            # Determine role
             role = getattr(m, "type", None) or getattr(m, "role", None) or m.__class__.__name__.lower()
             if role in ("ai", "assistant"):
                 role = "assistant"
             elif role in ("human", "user"):
                 role = "user"
             elif role in ("tool",):
-                # Skip tool messages - they're not needed in the database
-                continue
+                continue  # Skip tool messages in comparison
             elif role in ("system",):
                 role = "system"
             else:
                 role = "assistant" if "AIMessage" in str(type(m)) else "user"
 
-            # Get content
             content = getattr(m, "content", "")
             if not isinstance(content, str):
                 content = str(content)
 
-            # Skip empty assistant messages (intermediate states)
+            # Skip empty assistant messages
             if role == "assistant" and not content.strip():
                 continue
 
+            incoming_to_original_idx[len(incoming_messages)] = i
+            incoming_messages.append({"role": role, "content": content.strip()})
+
+        # Find how many messages at the start are identical
+        matching_count = 0
+        min_length = min(len(existing_messages), len(incoming_messages))
+
+        for i in range(min_length):
+            existing = existing_messages[i]
+            incoming = incoming_messages[i]
+
+            if existing["role"] == incoming["role"] and existing["content"] == incoming["content"]:
+                matching_count += 1
+            else:
+                break
+
+        # Only process the NEW messages (beyond the matching ones)
+        new_messages_to_save = incoming_messages[matching_count:]
+
+        if not new_messages_to_save:
+            return  # Nothing new to save
+
+        # Process and save NEW messages
+        message_docs = []
+        seq = current_max_seq + 1
+
+        for i, msg_data in enumerate(new_messages_to_save):
+            # Map back to original index for table lookup
+            filtered_index = matching_count + i
+            original_index = incoming_to_original_idx.get(filtered_index, -1)
+
             # Create message document
             msg_doc = ChatMessageDocument(
-                chat_history_id=chat_history_id, sequence=seq, role=role, message=content, tables=None
+                chat_history_id=chat_history_id,
+                sequence=seq,
+                role=msg_data["role"],
+                message=msg_data["content"],
+                tables=None,
             )
-            msg_doc.id = msg_doc.chat_message_id  # Ensure id matches
+            msg_doc.id = msg_doc.chat_message_id
 
             # Attach tables if this is an assistant message with tables
-            if i in tables_by_assistant_idx and role == "assistant":
-                tables = tables_by_assistant_idx[i]
+            if original_index in tables_by_assistant_idx and msg_data["role"] == "assistant":
+                tables = tables_by_assistant_idx[original_index]
                 if tables:
                     msg_doc.tables = [t.model_dump() for t in tables]
 
             message_docs.append(msg_doc)
             seq += 1
 
-        # Batch insert messages
-        for doc in message_docs:
-            messages_container.create_item(body=doc.model_dump())
+        if not message_docs:
+            return  # No valid messages to save
 
-        # Update history document
-        partition_key = user_id or "anonymous"
+        # Save the new messages
+        batch_errors = []
+
         try:
-            history = history_container.read_item(item=chat_history_id, partition_key=partition_key)
-            history["updated_at"] = datetime.utcnow().isoformat()
-            history["message_count"] = history.get("message_count", 0) + len(message_docs)
-            history_container.upsert_item(history)
-        except CosmosResourceNotFoundError:
-            pass  # History might not exist in edge cases
+            # Insert new messages
+            for doc in message_docs:
+                try:
+                    messages_container.create_item(body=doc.model_dump())
+                except Exception as e:
+                    batch_errors.append(f"Failed to save message {doc.id}: {str(e)}")
+
+            # Update history document
+            partition_key = user_id or "anonymous"
+            try:
+                history = history_container.read_item(item=chat_history_id, partition_key=partition_key)
+                history["updated_at"] = datetime.utcnow().isoformat()
+                history["message_count"] = len(existing_messages) + len(message_docs)
+                history_container.upsert_item(history)
+            except CosmosResourceNotFoundError:
+                # If history doesn't exist, create it
+                history_doc = ChatHistoryDocument(
+                    chat_history_id=chat_history_id,
+                    user_id=user_id or "anonymous",
+                    title=f"Chat {chat_history_id[:8]}",
+                    message_count=len(message_docs),
+                )
+                history_doc.id = chat_history_id
+                history_container.create_item(body=history_doc.model_dump())
+
+        except Exception as e:
+            # Log errors but don't fail the entire operation
+            import logging
+
+            logging.error(f"Error saving messages batch: {str(e)}")
+            if batch_errors:
+                logging.error(f"Batch errors: {batch_errors}")
+            raise e
 
     async def get_chat_history(
         self, chat_history_id: str, user_id: Optional[str] = None
