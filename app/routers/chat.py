@@ -128,9 +128,7 @@ async def get_chat_history(
             continue
 
         turn = ChatTurn(
-            role=msg.role,
-            content=msg.message,
-            tables=[TableSpec(**t) for t in msg.tables] if msg.tables else None
+            role=msg.role, content=msg.message, tables=[TableSpec(**t) for t in msg.tables] if msg.tables else None
         )
         messages.append(turn)
 

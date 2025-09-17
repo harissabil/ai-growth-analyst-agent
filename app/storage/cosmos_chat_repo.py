@@ -97,11 +97,7 @@ class ChatRepository:
 
             # Create message document
             msg_doc = ChatMessageDocument(
-                chat_history_id=chat_history_id,
-                sequence=seq,
-                role=role,
-                message=content,
-                tables=None
+                chat_history_id=chat_history_id, sequence=seq, role=role, message=content, tables=None
             )
             msg_doc.id = msg_doc.chat_message_id  # Ensure id matches
 
@@ -121,12 +117,9 @@ class ChatRepository:
         # Update history document
         partition_key = user_id or "anonymous"
         try:
-            history = history_container.read_item(
-                item=chat_history_id,
-                partition_key=partition_key
-            )
-            history['updated_at'] = datetime.utcnow().isoformat()
-            history['message_count'] = history.get('message_count', 0) + len(message_docs)
+            history = history_container.read_item(item=chat_history_id, partition_key=partition_key)
+            history["updated_at"] = datetime.utcnow().isoformat()
+            history["message_count"] = history.get("message_count", 0) + len(message_docs)
             history_container.upsert_item(history)
         except CosmosResourceNotFoundError:
             pass  # History might not exist in edge cases
