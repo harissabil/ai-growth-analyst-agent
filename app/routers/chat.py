@@ -1,8 +1,7 @@
 import uuid
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Query, Security
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import APIRouter, HTTPException, Query, Depends
 
 from app.agent.agent import get_graph
 from app.agent.tools.table.table_attach import attach_tables_to_assistant_turns
@@ -10,9 +9,8 @@ from app.logging import AuditJSONHandler
 from app.schemas.request import ChatRequest
 from app.schemas.response import ChatResponse, ChatTurn, TableSpec
 from app.storage.cosmos_chat_repo import chat_repository
+from app.utils.auth_utils import verify_token_and_get_user_id
 from app.utils.chat_utils import is_public, to_public_messages
-
-bearer_scheme = HTTPBearer(scheme_name="Bearer", description="Enter your Bearer token", bearerFormat="JWT")
 
 router = APIRouter()
 graph = get_graph()
@@ -21,12 +19,12 @@ graph = get_graph()
 @router.post("", response_model=ChatResponse)
 async def chat_with_agent(
     request: ChatRequest,
-    credentials: HTTPAuthorizationCredentials = Security(bearer_scheme),
     chat_history_id: Optional[str] = Query(default=None),
-    user_id: Optional[str] = Query(default=None),
+    auth_data: tuple = Depends(verify_token_and_get_user_id),
 ):
     """Process a chat request through the AI agent."""
-    token = credentials.credentials
+    # Extract token and user_id from auth dependency
+    token, user_id = auth_data
 
     try:
         # 1) Ensure a chat history row
@@ -111,10 +109,12 @@ async def chat_with_agent(
 @router.get("/history/{chat_history_id}", response_model=ChatResponse)
 async def get_chat_history(
     chat_history_id: str,
-    credentials: HTTPAuthorizationCredentials = Security(bearer_scheme),
-    user_id: Optional[str] = Query(default=None),
+    auth_data: tuple = Depends(verify_token_and_get_user_id),
 ):
     """Retrieve a specific chat history with all messages."""
+    # Extract token and user_id from auth dependency
+    token, user_id = auth_data
+
     history_with_messages = await chat_repository.get_chat_history(chat_history_id, user_id)
 
     if not history_with_messages:
@@ -137,12 +137,14 @@ async def get_chat_history(
 
 @router.get("/histories", response_model=List[dict])
 async def list_user_histories(
-    credentials: HTTPAuthorizationCredentials = Security(bearer_scheme),
-    user_id: str = Query(..., description="User ID to fetch histories for"),
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    auth_data: tuple = Depends(verify_token_and_get_user_id),
 ):
     """List chat histories for a user."""
+    # Extract token and user_id from auth dependency
+    token, user_id = auth_data
+
     histories = await chat_repository.list_user_histories(user_id, limit, offset)
 
     return [
@@ -160,10 +162,12 @@ async def list_user_histories(
 @router.delete("/history/{chat_history_id}")
 async def delete_chat_history(
     chat_history_id: str,
-    credentials: HTTPAuthorizationCredentials = Security(bearer_scheme),
-    user_id: Optional[str] = Query(default=None),
+    auth_data: tuple = Depends(verify_token_and_get_user_id),
 ):
     """Delete a chat history and all its messages."""
+    # Extract token and user_id from auth dependency
+    token, user_id = auth_data
+
     success = await chat_repository.delete_chat_history(chat_history_id, user_id)
 
     if not success:
