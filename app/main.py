@@ -71,7 +71,7 @@ app.include_router(chat_router, prefix="/chat", tags=["Chat"])
 @app.get("/")
 async def root():
     """Root endpoint for health check."""
-    return {"message": "AI Growth Analyst Agent is running", "storage": "Azure Cosmos DB", "version": "2.0.0"}
+    return {"message": "AI Growth Analyst Agent is running", "storage": "Azure Cosmos DB", "version": "0.0.1"}
 
 
 @app.get("/health")
