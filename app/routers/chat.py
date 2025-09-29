@@ -1,7 +1,7 @@
 import uuid
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.agent.agent import get_graph
 from app.agent.tools.table.table_attach import attach_tables_to_assistant_turns

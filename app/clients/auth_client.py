@@ -1,5 +1,7 @@
-import httpx
 from typing import Optional
+
+import httpx
+
 from app.config import get_settings
 
 
@@ -8,7 +10,7 @@ class AuthClient:
 
     def __init__(self):
         settings = get_settings()
-        self.base_url = str(settings.data_service_base_url).rstrip('/')
+        self.base_url = str(settings.data_service_base_url).rstrip("/")
         self.timeout = 30.0
 
     async def verify_token(self, token: str) -> Optional[str]:
@@ -24,11 +26,7 @@ class AuthClient:
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.get(
-                    f"{self.base_url}/auth/profile",
-                    headers={
-                        "Authorization": f"Bearer {token}",
-                        "accept": "*/*"
-                    }
+                    f"{self.base_url}/auth/profile", headers={"Authorization": f"Bearer {token}", "accept": "*/*"}
                 )
 
                 if response.status_code == 200:

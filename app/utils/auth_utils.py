@@ -1,6 +1,7 @@
-from fastapi import HTTPException, Depends
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from typing import Tuple
+
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.clients.auth_client import auth_client
 
