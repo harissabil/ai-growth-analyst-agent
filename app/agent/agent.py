@@ -31,6 +31,7 @@ def get_graph():
     - Produce **no user-facing text** in any assistant turn that contains tool calls. Keep `content` empty in that turn.
     - After tools return, produce **one** assistant reply in **Markdown** only (no raw JSON).  
     - Do **not** paste data tables in Markdown. The backend will attach structured tables to your reply; you may **reference them by name** (e.g., "see **Top Keywords (GSC)** table").
+    - **IMPORTANT**: `check_platform_availability()` returns JSON data, NOT a table. Do not reference a "Platform Availability table" - instead, parse the JSON and present the connection status in your Markdown response.
 
     - Start with a one-line summary that includes the **resolved date range** (`YYYY-MM-DD → YYYY-MM-DD`).
     - Prefer compact Markdown bullet points for key facts; use short inline code for numbers if needed.
@@ -48,6 +49,7 @@ def get_graph():
        - If a platform is not connected (connected: false) but the data are needed, inform the user which platforms need to be connected and skip data fetching for those platforms.
        - Only proceed with data fetching for platforms that are connected (connected: true).
        - If no platforms are connected, guide the user to connect their platforms first.
+       - **Platform availability responses are JSON, not tables** - parse and present the connection status directly in your Markdown response.
 
     2. **Act > Ask**
        - If required inputs are present or can be safely inferred, **call the tool(s) immediately**.
@@ -104,7 +106,7 @@ def get_graph():
     ## Tool Catalog (source of truth)
 
     ### Platform & Time utilities
-    - **`check_platform_availability()`** — check which platforms (GA4, GSC, Google Ads) are connected and available for data fetching. **CALL THIS FIRST IF YOU PLAN TO ACCESS THE PLATFORM TOOLS**.
+    - **`check_platform_availability()`** — check which platforms (GA4, GSC, Google Ads) are connected and available for data fetching. **CALL THIS FIRST IF YOU PLAN TO ACCESS THE PLATFORM TOOLS**. Returns JSON data (not a table).
     - **`get_current_datetime()`** — get current timestamp for resolving relative dates.
 
     ### Google Analytics (GA4) - **Only call if google_analytics.connected = true**
@@ -135,7 +137,6 @@ def get_graph():
 
     - **Header**: "**Summary (YYYY-MM-DD → YYYY-MM-DD)** — brief description"
     - **Sections**: `## Overall`, `## Daily`, `## Countries`, `## Pages`, `## Keywords`, `## Campaigns` (as applicable)
-    - **Tables**: keep narrow; right-align numerics; include units (e.g., `%`, currency)
     - **Insight**: 2–3 sentences (trend → implication → (optional) action)
 
     ---
@@ -164,7 +165,13 @@ def get_graph():
     1) `check_platform_availability()` → none connected
     Respond: "No platforms are currently connected. Please connect Google Analytics, Search Console, or Google Ads to view your data."
 
-    **D) Missing required path with platform check**
+    **D) Platform connectivity status query**
+    User: "Which platforms has my account connected to?"
+    Action:
+    1) `check_platform_availability()` → returns JSON with connection status
+    Respond: Parse the JSON and present connection status in Markdown format with platform names and their connected/disconnected status. Do NOT reference a table.
+
+    **E) Missing required path with platform check**
     User: "How is my homepage doing January 1–31, 2025?"
     Action:
     1) `check_platform_availability()` → check GA connection first
