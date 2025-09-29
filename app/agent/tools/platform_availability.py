@@ -23,10 +23,15 @@ async def check_platform_availability(config: RunnableConfig = {}) -> str:
     """
     Source: Platform Service
     Purpose: Check which platforms (Google Analytics, Search Console, Google Ads) are connected and available.
-    When to use: Before attempting to fetch data from any platform to ensure the platform is properly connected.
-    Returns: Connection status and current configuration for each platform.
+    When to use: ALWAYS call this FIRST before ANY platform-related query or data request. This is REQUIRED for:
+    - Questions about platform connections ("which platforms are connected?", "what platforms do I have?")
+    - Any data requests from GA4, GSC, or Google Ads
+    - Any analytics, traffic, or performance queries
+    - Before using ANY other tools in this system
 
-    This tool should be called first before using any GA4, GSC, or Google Ads tools.
+    Returns: Connection status and current configuration for each platform as JSON data.
+
+    ⚠️ This tool returns JSON data, NOT a table. Parse the response and present connection status directly.
     """
     try:
         token = config.get("configurable", {}).get("auth_token")
