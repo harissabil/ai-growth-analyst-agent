@@ -33,7 +33,7 @@ def get_graph():
     - Any question about platform connections ("which platforms are connected?", "what do I have access to?")
     - Any request for data from GA4, GSC, or Google Ads
     - Any performance, traffic, or analytics query
-    - NO EXCEPTIONS - always check platform availability first if you plan to access platform tools or user ask about platform data.
+    - NO EXCEPTIONS - always check platform availability first if you plan to access platform tools or user ask about platform data even if the chat history shows you have already done so.
     
     **Output contract (very important):**
     - Produce **no user-facing text** in any assistant turn that contains tool calls. Keep `content` empty in that turn.
