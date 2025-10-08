@@ -1,0 +1,319 @@
+@baseUrl = http://127.0.0.1:8000
+@token = your_api_key_here
+@campaignId = your_campaign_id_here
+
+### @name ga_pages_keyword_direct
+# GA pages ranking with keyword (direct call)
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "List 15 website pages ranked by traffic metrics from 2025-01-01 to 2025-01-31 with keyword \"Ferrari\""
+    }
+  ]
+}
+
+### @name gsc_keywords_ranking_direct
+# GSC keywords ranking with filter (direct call)
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Show top 20 Search Console keywords in January 2025 containing BMW"
+    }
+  ]
+}
+
+### @name parallel_gsc_countries_ga_pages
+# Parallel calls: GSC countries + GA pages
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "For 2025-01-01 to 2025-01-31, show top 10 countries by clicks (GSC) and top 10 web pages by traffic (GA) filtered by keyword \"BMW\"."
+    }
+  ]
+}
+
+### @name sequential_gsc_top_keyword_then_daily
+# Sequential: find top keyword then daily for that keyword (GSC)
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "In January 2025, find the top keyword by clicks in Search Console, then show me its daily performance."
+    }
+  ]
+}
+
+### @name ga_daily_last_week_organic
+# Relative dates: GA daily last week (organic only)
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Show daily GA traffic last week (organic only)."
+    }
+  ]
+}
+
+### @name ads_campaign_daily_last_month
+# Relative dates: Ads campaign daily last month
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Give me the daily performance for Google Ads campaign {{campaignId}} last month."
+    }
+  ]
+}
+
+### @name mixed_overall_ga_gsc_ads
+# Mixed overview (GA + GSC + Ads) side-by-side
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "For 2025-01-01 to 2025-01-31, show overall metrics from GA4, Search Console, and Google Ads side-by-side."
+    }
+  ]
+}
+
+### @name gsc_countries_with_substring_filter
+# GSC country list with substring filter
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Show top 5 countries in January 2025 where the country name contains 'es'."
+    }
+  ]
+}
+
+### @name gsc_daily_for_country_partial
+# GSC daily for a country using unique partial path
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "In January 2025, show Search Console daily metrics for spain."
+    }
+  ]
+}
+
+### @name ads_campaigns_list
+# Ads campaigns list (broad date range)
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "List Google Ads campaigns with metrics from 2023-01-01 to 2025-01-31."
+    }
+  ]
+}
+
+### @name sequential_ads_top_spend_then_daily
+# Sequential: Ads — pick top campaign by spend, then daily breakdown
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "For Jan 2025, find the Google Ads campaign with the highest spend and then show its daily performance."
+    }
+  ]
+}
+
+### @name clarify_missing_page_path_step1
+# Clarification flow: missing GA page_path — Step 1 (expect agent to ask which path)
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "How is my homepage doing Jan 1–31, 2025?"
+    }
+  ]
+}
+
+### @name clarify_missing_page_path_step2
+# Clarification flow: provide GA page_path after agent asks — Step 2
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Which page path? e.g., \"/\" or \"/home\"."
+    },
+    {
+      "role": "user",
+      "content": "Use /home for Jan 1–31, 2025."
+    }
+  ]
+}
+
+### @name gsc_keyword_daily_exact
+# GSC keyword daily (exact keyword path)
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Show daily Search Console metrics for keyword \"bmw x8\" from 2025-01-01 to 2025-01-31."
+    }
+  ]
+}
+
+### @name gsc_country_partial
+# GSC country partial
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "In Jan 2025, show Search Console daily metrics for 'united'."
+    }
+  ]
+}
+
+### @name gsc_overall_yesterday
+# Relative dates: GSC overall yesterday
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Give me Search Console overall for yesterday."
+    }
+  ]
+}
+
+### @name ga_vs_gsc_last_quarter
+# Relative dates: GA vs GSC last quarter overview; no aggregation (side-by-side)
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Compare GA overall and GSC overall last quarter, side-by-side."
+    }
+  ]
+}
+
+### @name ads_overall_broad
+# Ads overall (broad window)
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Show Google Ads overall from 2023-01-01 to 2025-01-31."
+    }
+  ]
+}
+
+### @name multi_product_parallel_and_sequential
+# Multi-product drilldown: parallel GA+GSC overviews + sequential Ads ROI winner then daily
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "For Jan 2025, show GA overall and GSC overall. Also, identify the Ads campaign with the highest ROI and provide its daily breakdown."
+    }
+  ]
+}
+
+### @name invalid_dates_expect_automated_handling
+# Invalid dates (end before start) — expect automated correction/handling
+POST {{baseUrl}}/chat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Show GA daily from 2025-02-01 to 2025-01-01."
+    }
+  ]
+}
+
+### @name history_check
+# History check for anonymous user (no auth)
+GET {{baseUrl}}/chat/histories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### @name history_detail_check
+# History detail check for anonymous user (no auth)
+GET {{baseUrl}}/chat/history/d6cba914-d17c-4a53-bc67-f22830635ec0?user_id=anonymous
+Content-Type: application/json
+Authorization: Bearer {{token}}

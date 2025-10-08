@@ -20,10 +20,12 @@ from .google_search_console import (
     get_search_console_keywords,
     get_search_console_overall,
 )
+from .platform_availability import check_platform_availability
 from .utils import get_current_datetime
 
 utility_tools = [
     get_current_datetime,
+    check_platform_availability,
 ]
 
 google_analytics_tools = [
