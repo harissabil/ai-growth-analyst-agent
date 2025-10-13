@@ -49,6 +49,10 @@ class DailyAnalyticsData(BaseAnalyticsData):
     date: date
 
 
+class HourlyAnalyticsData(DailyAnalyticsData):
+    time: str
+
+
 class CountryAnalyticsData(BaseAnalyticsData):
     country: str
 
@@ -93,7 +97,7 @@ class GoogleAnalyticsClient:
         self, start_date: date, end_date: date, organic_only: bool = False
     ) -> BaseAnalyticsData:
         """Fetches overall analytics data."""
-        endpoint = "/google-analytics/overall-organic-traffic" if organic_only else "/google-analytics/overall"
+        endpoint = "/google-analytics/overall-organic" if organic_only else "/google-analytics/overall"
         params = {"start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
         response_data = await self._make_request("GET", endpoint, params=params)
         return BaseAnalyticsData.model_validate(response_data["data"])
@@ -102,10 +106,19 @@ class GoogleAnalyticsClient:
         self, start_date: date, end_date: date, organic_only: bool = False
     ) -> List[DailyAnalyticsData]:
         """Fetches daily analytics data."""
-        endpoint = "/google-analytics/daily-organic-traffic" if organic_only else "/google-analytics/daily"
+        endpoint = "/google-analytics/daily-organic" if organic_only else "/google-analytics/daily"
         params = {"start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
         response_data = await self._make_request("GET", endpoint, params=params)
         return [DailyAnalyticsData.model_validate(item) for item in response_data["data"]]
+
+    async def fetch_hourly_data(
+        self, start_date: date, end_date: date, organic_only: bool = False
+    ) -> List[HourlyAnalyticsData]:
+        """Fetches hourly analytics data."""
+        endpoint = "/google-analytics/hourly-organic" if organic_only else "/google-analytics/hourly"
+        params = {"start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
+        response_data = await self._make_request("GET", endpoint, params=params)
+        return [HourlyAnalyticsData.model_validate(item) for item in response_data["data"]]
 
     async def fetch_countries_data(
         self,

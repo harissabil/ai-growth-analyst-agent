@@ -157,6 +157,31 @@ async def get_google_analytics_daily_traffic(
         return f"Error fetching daily traffic: {e.errors}"
 
 
+@tool(args_schema=GaTrafficInput)
+async def get_google_analytics_hourly_traffic(
+    start_date: date, end_date: date, organic_only: bool = False, config: RunnableConfig = {}
+) -> str:
+    """
+    Source: Google Analytics
+    Purpose: Hourly time series for a date range (intra-day trends).
+    Required: start_date, end_date (absolute dates).
+    Options: organic_only=True if requested.
+    """
+    try:
+        # Return a placeholder response for now
+        # return '[{"date": "2023-10-01", "time": "00:00", "sessions": 50, "users": 40, "page_views": 70, "bounce_rate": 55.0, "avg_session_duration": 200}, {"date": "2023-10-01", "time": "01:00", "sessions": 60, "users": 50, "page_views": 80, "bounce_rate": 50.0, "avg_session_duration": 220}]'
+        settings = get_settings()
+        token = config.get("configurable", {}).get("auth_token")
+        if not token:
+            return "Error: Authentication token was not provided to the tool."
+        client = GoogleAnalyticsClient(base_url=str(settings.data_service_base_url), token=token)
+
+        data = await client.fetch_hourly_data(start_date, end_date, organic_only)
+        return format_response(data)
+    except APIError as e:
+        return f"Error fetching hourly traffic: {e.errors}"
+
+
 @tool(args_schema=GaByDimensionInput)
 async def get_google_analytics_traffic_by_countries(
     start_date: date,

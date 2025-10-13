@@ -128,6 +128,26 @@ async def get_search_console_daily(start_date: date, end_date: date, config: Run
         return f"Error fetching Search Console daily: {e.errors}"
 
 
+@tool(args_schema=GscTrafficInput)
+async def get_search_console_hourly(start_date: date, end_date: date, config: RunnableConfig = {}) -> str:
+    """
+    Source: Google Search Console
+    Purpose: Hourly time series of clicks/impressions/ctr_percent/average_position.
+    Required: start_date, end_date (absolute dates).
+    """
+    try:
+        settings = get_settings()
+        token = config.get("configurable", {}).get("auth_token")
+        if not token:
+            return "Error: Authentication token was not provided to the tool."
+
+        client = GoogleSearchConsoleClient(base_url=str(settings.data_service_base_url), token=token)
+        data = await client.fetch_hourly_data(start_date, end_date)
+        return format_response(data)
+    except APIError as e:
+        return f"Error fetching Search Console hourly: {e.errors}"
+
+
 @tool(args_schema=GscByDimensionInput)
 async def get_search_console_keywords(
     start_date: date,
