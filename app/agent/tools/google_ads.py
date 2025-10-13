@@ -90,6 +90,26 @@ async def get_google_ads_daily(start_date: date, end_date: date, config: Runnabl
 
 
 @tool(args_schema=AdsTrafficInput)
+async def get_google_ads_hourly(start_date: date, end_date: date, config: RunnableConfig = {}) -> str:
+    """
+    Source: Google Ads
+    Purpose: Hourly time series for a date range (impressions, currency, spend, conversion_rate_percent, ctr_percent, roi_percent).
+    Required: start_date, end_date (absolute dates).
+    """
+    try:
+        settings = get_settings()
+        token = config.get("configurable", {}).get("auth_token")
+        if not token:
+            return "Error: Authentication token was not provided to the tool."
+
+        client = GoogleAdsClient(base_url=str(settings.data_service_base_url), token=token)
+        data = await client.fetch_hourly_data(start_date, end_date)
+        return format_response(data)
+    except APIError as e:
+        return f"Error fetching Google Ads hourly: {e.errors}"
+
+
+@tool(args_schema=AdsTrafficInput)
 async def get_google_ads_campaigns(start_date: date, end_date: date, config: RunnableConfig = {}) -> str:
     """
     Source: Google Ads

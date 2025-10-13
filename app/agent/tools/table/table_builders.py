@@ -58,6 +58,12 @@ def build_gsc_daily_table(payload: str) -> List[TableSpec]:
     return _build_table("Daily (GSC)", data, keys)
 
 
+def build_gsc_hourly_table(payload: str) -> List[TableSpec]:
+    data = _safe_parse(payload)
+    keys = ["date", "time", "clicks", "impressions", "ctr_percent", "average_position"]
+    return _build_table("Hourly (GSC)", data, keys)
+
+
 def build_gsc_daily_for_country_table(payload: str) -> List[TableSpec]:
     # same shape as daily
     return build_gsc_daily_table(payload)
@@ -89,6 +95,12 @@ def build_ga_daily_table(payload: str) -> List[TableSpec]:
     data = _safe_parse(payload)
     keys = ["date"] + GA_METRIC_KEYS
     return _build_table("Daily (GA4)", data, keys)
+
+
+def build_ga_hourly_table(payload: str) -> List[TableSpec]:
+    data = _safe_parse(payload)
+    keys = ["date", "time"] + GA_METRIC_KEYS
+    return _build_table("Hourly (GA4)", data, keys)
 
 
 def build_ga_countries_table(payload: str) -> List[TableSpec]:
@@ -136,6 +148,12 @@ def build_ads_daily_table(payload: str) -> List[TableSpec]:
     return _build_table("Daily (Ads)", data, keys)
 
 
+def build_ads_hourly_table(payload: str) -> List[TableSpec]:
+    data = _safe_parse(payload)
+    keys = ["date", "time"] + ADS_BASE_KEYS
+    return _build_table("Hourly (Ads)", data, keys)
+
+
 def build_ads_campaigns_table(payload: str) -> List[TableSpec]:
     data = _safe_parse(payload)
     # CampaignSummaryData uses id, name, status (not campaign_id)
@@ -153,6 +171,7 @@ TOOL_TABLE_BUILDERS = {
     # GA
     "get_google_analytics_overall_traffic": build_ga_overall_table,
     "get_google_analytics_daily_traffic": build_ga_daily_table,
+    "get_google_analytics_hourly_traffic": build_ga_hourly_table,
     "get_google_analytics_traffic_by_countries": build_ga_countries_table,
     "get_google_analytics_daily_traffic_for_country": build_ga_daily_for_country_table,
     "get_google_analytics_traffic_by_pages": build_ga_pages_table,
@@ -160,6 +179,7 @@ TOOL_TABLE_BUILDERS = {
     # GSC
     "get_search_console_overall": build_gsc_overall_table,
     "get_search_console_daily": build_gsc_daily_table,
+    "get_search_console_hourly": build_gsc_hourly_table,
     "get_search_console_keywords": build_gsc_keywords_table,
     "get_search_console_countries": build_gsc_countries_table,
     "get_search_console_daily_for_country": build_gsc_daily_for_country_table,
@@ -167,6 +187,7 @@ TOOL_TABLE_BUILDERS = {
     # Ads
     "get_google_ads_overall": build_ads_overall_table,
     "get_google_ads_daily": build_ads_daily_table,
+    "get_google_ads_hourly": build_ads_hourly_table,
     "get_google_ads_campaigns": build_ads_campaigns_table,
     "get_google_ads_daily_for_campaign": build_ads_daily_for_campaign_table,
 }

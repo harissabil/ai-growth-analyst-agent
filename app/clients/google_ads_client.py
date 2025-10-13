@@ -51,6 +51,10 @@ class DailyAdsData(BaseAdsData):
     date: date
 
 
+class HourlyAdsData(DailyAdsData):
+    time: str
+
+
 class CampaignSummaryData(BaseAdsData):
     id: str
     name: str
@@ -113,6 +117,14 @@ class GoogleAdsClient:
         data = await self._make_request("GET", "/google-ads/daily", params=params)
         return [DailyAdsData.model_validate(item) for item in data["data"]]
 
+    async def fetch_hourly_data(self, start_date: date, end_date: date) -> List[HourlyAdsData]:
+        """
+        GET /google-ads/hourly
+        """
+        params = {"start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
+        data = await self._make_request("GET", "/google-ads/hourly", params=params)
+        return [HourlyAdsData.model_validate(item) for item in data["data"]]
+
     async def fetch_campaigns_data(self, start_date: date, end_date: date) -> List[CampaignSummaryData]:
         """
         GET /google-ads/campaigns
@@ -122,7 +134,7 @@ class GoogleAdsClient:
         return [CampaignSummaryData.model_validate(item) for item in data["data"]]
 
     async def fetch_campaign_detail_data(
-        self, campaign_id: str, start_date: date, end_date: date
+            self, campaign_id: str, start_date: date, end_date: date
     ) -> List[DailyAdsData]:
         """
         GET /google-ads/campaigns/{id}

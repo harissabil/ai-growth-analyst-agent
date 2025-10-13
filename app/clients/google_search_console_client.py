@@ -49,6 +49,10 @@ class DailySearchConsoleData(BaseSearchConsoleData):
     date: date
 
 
+class HourlySearchConsoleData(DailySearchConsoleData):
+    time: str
+
+
 class KeywordSearchConsoleData(BaseSearchConsoleData):
     keyword: str
 
@@ -115,12 +119,20 @@ class GoogleSearchConsoleClient:
         data = await self._make_request("GET", "/google-search-console/daily", params=params)
         return [DailySearchConsoleData.model_validate(item) for item in data["data"]]
 
+    async def fetch_hourly_data(self, start_date: date, end_date: date) -> List[HourlySearchConsoleData]:
+        """
+        GET /google-search-console/hourly
+        """
+        params = {"start_date": start_date.isoformat(), "end_date": end_date.isoformat()}
+        data = await self._make_request("GET", "/google-search-console/hourly", params=params)
+        return [HourlySearchConsoleData.model_validate(item) for item in data["data"]]
+
     async def fetch_keywords_data(
-        self,
-        start_date: date,
-        end_date: date,
-        limit: int = 10,
-        search: Optional[str] = None,
+            self,
+            start_date: date,
+            end_date: date,
+            limit: int = 10,
+            search: Optional[str] = None,
     ) -> List[KeywordSearchConsoleData]:
         """
         GET /google-search-console/keywords
@@ -137,10 +149,10 @@ class GoogleSearchConsoleClient:
         return [KeywordSearchConsoleData.model_validate(item) for item in data["data"]]
 
     async def fetch_keyword_detail_data(
-        self,
-        keyword: str,
-        start_date: date,
-        end_date: date,
+            self,
+            keyword: str,
+            start_date: date,
+            end_date: date,
     ) -> List[DailySearchConsoleData]:
         """
         GET /google-search-console/keywords/{keyword}
@@ -152,11 +164,11 @@ class GoogleSearchConsoleClient:
         return [DailySearchConsoleData.model_validate(item) for item in data["data"]]
 
     async def fetch_countries_data(
-        self,
-        start_date: date,
-        end_date: date,
-        limit: int = 10,
-        search: Optional[str] = None,
+            self,
+            start_date: date,
+            end_date: date,
+            limit: int = 10,
+            search: Optional[str] = None,
     ) -> List[CountrySearchConsoleData]:
         """
         GET /google-search-console/countries
@@ -173,10 +185,10 @@ class GoogleSearchConsoleClient:
         return [CountrySearchConsoleData.model_validate(item) for item in data["data"]]
 
     async def fetch_country_detail_data(
-        self,
-        country: str,  # can be partial but must be unique per service rules
-        start_date: date,
-        end_date: date,
+            self,
+            country: str,  # can be partial but must be unique per service rules
+            start_date: date,
+            end_date: date,
     ) -> List[DailySearchConsoleData]:
         """
         GET /google-search-console/countries/{country}
