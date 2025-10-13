@@ -128,11 +128,11 @@ class GoogleSearchConsoleClient:
         return [HourlySearchConsoleData.model_validate(item) for item in data["data"]]
 
     async def fetch_keywords_data(
-            self,
-            start_date: date,
-            end_date: date,
-            limit: int = 10,
-            search: Optional[str] = None,
+        self,
+        start_date: date,
+        end_date: date,
+        limit: int = 10,
+        search: Optional[str] = None,
     ) -> List[KeywordSearchConsoleData]:
         """
         GET /google-search-console/keywords
@@ -149,10 +149,10 @@ class GoogleSearchConsoleClient:
         return [KeywordSearchConsoleData.model_validate(item) for item in data["data"]]
 
     async def fetch_keyword_detail_data(
-            self,
-            keyword: str,
-            start_date: date,
-            end_date: date,
+        self,
+        keyword: str,
+        start_date: date,
+        end_date: date,
     ) -> List[DailySearchConsoleData]:
         """
         GET /google-search-console/keywords/{keyword}
@@ -164,11 +164,11 @@ class GoogleSearchConsoleClient:
         return [DailySearchConsoleData.model_validate(item) for item in data["data"]]
 
     async def fetch_countries_data(
-            self,
-            start_date: date,
-            end_date: date,
-            limit: int = 10,
-            search: Optional[str] = None,
+        self,
+        start_date: date,
+        end_date: date,
+        limit: int = 10,
+        search: Optional[str] = None,
     ) -> List[CountrySearchConsoleData]:
         """
         GET /google-search-console/countries
@@ -185,10 +185,10 @@ class GoogleSearchConsoleClient:
         return [CountrySearchConsoleData.model_validate(item) for item in data["data"]]
 
     async def fetch_country_detail_data(
-            self,
-            country: str,  # can be partial but must be unique per service rules
-            start_date: date,
-            end_date: date,
+        self,
+        country: str,  # can be partial but must be unique per service rules
+        start_date: date,
+        end_date: date,
     ) -> List[DailySearchConsoleData]:
         """
         GET /google-search-console/countries/{country}

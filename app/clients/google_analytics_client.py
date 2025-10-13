@@ -94,7 +94,7 @@ class GoogleAnalyticsClient:
             raise APIError(status_code=503, errors=[f"Failed to connect to the service: {e}"])
 
     async def fetch_overall_data(
-            self, start_date: date, end_date: date, organic_only: bool = False
+        self, start_date: date, end_date: date, organic_only: bool = False
     ) -> BaseAnalyticsData:
         """Fetches overall analytics data."""
         endpoint = "/google-analytics/overall-organic-traffic" if organic_only else "/google-analytics/overall"
@@ -103,7 +103,7 @@ class GoogleAnalyticsClient:
         return BaseAnalyticsData.model_validate(response_data["data"])
 
     async def fetch_daily_data(
-            self, start_date: date, end_date: date, organic_only: bool = False
+        self, start_date: date, end_date: date, organic_only: bool = False
     ) -> List[DailyAnalyticsData]:
         """Fetches daily analytics data."""
         endpoint = "/google-analytics/daily-organic-traffic" if organic_only else "/google-analytics/daily"
@@ -112,7 +112,7 @@ class GoogleAnalyticsClient:
         return [DailyAnalyticsData.model_validate(item) for item in response_data["data"]]
 
     async def fetch_hourly_data(
-            self, start_date: date, end_date: date, organic_only: bool = False
+        self, start_date: date, end_date: date, organic_only: bool = False
     ) -> List[HourlyAnalyticsData]:
         """Fetches hourly analytics data."""
         endpoint = "/google-analytics/hourly-organic-traffic" if organic_only else "/google-analytics/hourly"
@@ -121,12 +121,12 @@ class GoogleAnalyticsClient:
         return [HourlyAnalyticsData.model_validate(item) for item in response_data["data"]]
 
     async def fetch_countries_data(
-            self,
-            start_date: date,
-            end_date: date,
-            order_by: Literal["asc", "desc"] = "desc",
-            limit: int = 10,
-            search: Optional[str] = None,
+        self,
+        start_date: date,
+        end_date: date,
+        order_by: Literal["asc", "desc"] = "desc",
+        limit: int = 10,
+        search: Optional[str] = None,
     ) -> List[CountryAnalyticsData]:
         """Fetches analytics data grouped by country."""
         endpoint = "/google-analytics/countries"
@@ -142,7 +142,7 @@ class GoogleAnalyticsClient:
         return [CountryAnalyticsData.model_validate(item) for item in response_data["data"]]
 
     async def fetch_country_detail_data(
-            self, country: str, start_date: date, end_date: date
+        self, country: str, start_date: date, end_date: date
     ) -> List[DailyAnalyticsData]:
         """Fetches daily analytics for a specific country."""
         endpoint = f"/google-analytics/countries/{country.lower()}"
@@ -151,12 +151,12 @@ class GoogleAnalyticsClient:
         return [DailyAnalyticsData.model_validate(item) for item in response_data["data"]]
 
     async def fetch_pages_data(
-            self,
-            start_date: date,
-            end_date: date,
-            order_by: Literal["asc", "desc"] = "desc",
-            limit: int = 10,
-            search: Optional[str] = None,
+        self,
+        start_date: date,
+        end_date: date,
+        order_by: Literal["asc", "desc"] = "desc",
+        limit: int = 10,
+        search: Optional[str] = None,
     ) -> List[PageAnalyticsData]:
         """Fetches analytics data grouped by page."""
         endpoint = "/google-analytics/pages"
@@ -172,7 +172,7 @@ class GoogleAnalyticsClient:
         return [PageAnalyticsData.model_validate(item) for item in response_data["data"]]
 
     async def fetch_page_detail_data(
-            self, page_path: str, start_date: date, end_date: date
+        self, page_path: str, start_date: date, end_date: date
     ) -> List[DailyAnalyticsData]:
         """Fetches daily analytics for a specific page."""
         # The page path needs to be URL encoded if it contains special characters,

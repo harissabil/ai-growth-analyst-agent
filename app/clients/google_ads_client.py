@@ -134,7 +134,7 @@ class GoogleAdsClient:
         return [CampaignSummaryData.model_validate(item) for item in data["data"]]
 
     async def fetch_campaign_detail_data(
-            self, campaign_id: str, start_date: date, end_date: date
+        self, campaign_id: str, start_date: date, end_date: date
     ) -> List[DailyAdsData]:
         """
         GET /google-ads/campaigns/{id}
